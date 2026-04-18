@@ -155,8 +155,18 @@ if __name__ == '__main__':
     print(f"Number of validation samples: {len(val_dataset)}")
 
     model = ResNetClassifier(num_classes=NUM_CLASSES).to(DEVICE)
-    
-    criterion = nn.CrossEntropyLoss()
+
+    # Class-weighted cross-entropy loss to handle class imbalance
+    # Weights are computed as inverse frequency: total / (num_classes * class_count)
+    from collections import Counter
+    label_counts = Counter([label for _, label in train_dataset.samples])
+    total_samples = len(train_dataset.samples)
+    class_weights = torch.tensor(
+        [total_samples / (NUM_CLASSES * label_counts.get(i, 1)) for i in range(NUM_CLASSES)],
+        dtype=torch.float32
+    ).to(DEVICE)
+    print(f"Class weights: {class_weights.tolist()}")
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3, factor=0.1, verbose=True)
 

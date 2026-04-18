@@ -838,7 +838,18 @@ def main(args):
     model.to(device)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    criterion = nn.CrossEntropyLoss()
+
+    # Class-weighted cross-entropy loss to handle class imbalance
+    # Weights computed as inverse frequency: total / (num_classes * class_count)
+    from collections import Counter
+    label_counts = Counter([label for _, label in dataset_train.samples])
+    total_samples = len(dataset_train.samples)
+    class_weights = torch.tensor(
+        [total_samples / (num_classes * label_counts.get(i, 1)) for i in range(num_classes)],
+        dtype=torch.float32
+    ).to(device)
+    print(f"Class weights: {class_weights.tolist()}")
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     print(f"Start training for {args.epochs} epochs")
     start_time = time.time()

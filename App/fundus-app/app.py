@@ -9,16 +9,16 @@ from timm.layers import trunc_normal_, DropPath
 import os
 
 # --- CONFIGURATION ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATHS = {
-    "ConvNeXt": "/content/fundus/models/convnext-xl.pth",
-    "AttentionUNet": "/content/fundus/models/attentionUnet.pth",
-    "ResNet50": "/content/fundus/models/resnet50.pth",
-    "ResNet101": "/content/fundus/models/resnet101.pth"
+    "ConvNeXt": os.path.join(BASE_DIR, "models", "convnext-xl.pth"),
+    "AttentionUNet": os.path.join(BASE_DIR, "models", "attentionUnet.pth"),
+    "ResNet50": os.path.join(BASE_DIR, "models", "resnet50.pth"),
+    "ResNet101": os.path.join(BASE_DIR, "models", "resnet101.pth")
 }
 
-# UPDATE: Changed to 5 classes to match your checkpoint weights (Shape: [5, ...])
-# Replace these strings with your actual label names (e.g., ['Normal', 'DR', 'Glaucoma', ...])
-CLASS_NAMES = ["Class 0", "Class 1", "Class 2", "Class 3", "Class 4"]
+# Diabetic Retinopathy severity grades (5-class)
+CLASS_NAMES = ["No DR", "Mild", "Moderate", "Severe", "Proliferative"]
 NUM_CLASSES = len(CLASS_NAMES)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
